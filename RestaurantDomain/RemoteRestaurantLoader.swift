@@ -11,12 +11,14 @@ import Foundation
 final class RemoteRestaurantLoader {
     
     let url: URL
+    let networkClient: NetworkClient
     
-    init(url: URL) {
+    init(url: URL, networkClient: NetworkClient) {
         self.url = url
+        self.networkClient = networkClient
     }
     
     func load() {
-        NetworkClient.shared.request(from: url)
+        networkClient.request(from: url)
     }
 }
