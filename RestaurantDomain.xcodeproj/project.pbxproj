@@ -10,6 +10,8 @@
 		926F0B0C299DC92C007E2FDE /* RestaurantDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 926F0B03299DC92C007E2FDE /* RestaurantDomain.framework */; };
 		926F0B11299DC92C007E2FDE /* RestaurantDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926F0B10299DC92C007E2FDE /* RestaurantDomainTests.swift */; };
 		926F0B12299DC92C007E2FDE /* RestaurantDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 926F0B06299DC92C007E2FDE /* RestaurantDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		92772475299F0D7000A5034B /* RemoteRestaurantLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92772474299F0D7000A5034B /* RemoteRestaurantLoader.swift */; };
+		92772477299F0DBD00A5034B /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92772476299F0DBD00A5034B /* NetworkClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +29,8 @@
 		926F0B06299DC92C007E2FDE /* RestaurantDomain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RestaurantDomain.h; sourceTree = "<group>"; };
 		926F0B0B299DC92C007E2FDE /* RestaurantDomainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RestaurantDomainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		926F0B10299DC92C007E2FDE /* RestaurantDomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantDomainTests.swift; sourceTree = "<group>"; };
+		92772474299F0D7000A5034B /* RemoteRestaurantLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteRestaurantLoader.swift; sourceTree = "<group>"; };
+		92772476299F0DBD00A5034B /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +74,8 @@
 			isa = PBXGroup;
 			children = (
 				926F0B06299DC92C007E2FDE /* RestaurantDomain.h */,
+				92772474299F0D7000A5034B /* RemoteRestaurantLoader.swift */,
+				92772476299F0DBD00A5034B /* NetworkClient.swift */,
 			);
 			path = RestaurantDomain;
 			sourceTree = "<group>";
@@ -144,6 +150,7 @@
 				TargetAttributes = {
 					926F0B02299DC92C007E2FDE = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
 					};
 					926F0B0A299DC92C007E2FDE = {
 						CreatedOnToolsVersion = 14.2;
@@ -191,6 +198,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92772475299F0D7000A5034B /* RemoteRestaurantLoader.swift in Sources */,
+				92772477299F0DBD00A5034B /* NetworkClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,6 +344,7 @@
 		926F0B16299DC92C007E2FDE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -355,6 +365,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -362,6 +373,7 @@
 		926F0B17299DC92C007E2FDE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -389,6 +401,7 @@
 		926F0B19299DC92C007E2FDE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -403,6 +416,7 @@
 		926F0B1A299DC92C007E2FDE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
