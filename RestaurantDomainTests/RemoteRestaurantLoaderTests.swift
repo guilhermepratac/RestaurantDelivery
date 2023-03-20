@@ -73,6 +73,53 @@ final class RemoteRestaurantLoaderTests: XCTestCase {
                 
         XCTAssertEqual(returnedResult, .success([]))
     }
+    
+    func test_load_and_returned_sucess_with_restaurant_item_list() throws {
+        let (sut, Doubles) = makeSUT()
+        
+        let exp = expectation(description: "Esperando retorno da closure")
+        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
+        
+        sut.load() { result in
+            returnedResult = result
+            exp.fulfill()
+        }
+        
+        let (model1, json1) = makeItem()
+        let (model2, json2) = makeItem()
+        let (model3, json3) = makeItem()
+
+        let jsonItem = ["items": [json1, json2, json3]]
+        let data = try XCTUnwrap(JSONSerialization.data(withJSONObject: jsonItem))
+        
+        Doubles.client.completionWithSucess(data: data)
+        
+        wait(for: [exp], timeout: 1.0)
+                
+        XCTAssertEqual(returnedResult, .success([model1, model2, model3]))
+    }
+    
+    func test_load_and_returned_error_for_invalid_statusCode() throws {
+        let (sut, Doubles) = makeSUT()
+
+        let exp = expectation(description: "Esperando retorno da closure")
+        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
+        sut.load() { result in
+            returnedResult = result
+            exp.fulfill()
+        }
+        
+        let (_, json1) = makeItem()
+
+        let jsonItem = ["items": [json1]]
+        let data = try XCTUnwrap(JSONSerialization.data(withJSONObject: jsonItem))
+        Doubles.client.completionWithSucess(statusCode: 201, data: data)
+
+        
+        wait(for: [exp], timeout: 1.0)
+                
+        XCTAssertEqual(returnedResult, .failure(.invalidData))
+    }
 
 
 }
@@ -93,6 +140,32 @@ private extension RemoteRestaurantLoaderTests {
     
     private func emptyData() -> Data{
         return Data("{ \"items\":[] }".utf8)
+    }
+    
+    private func makeItem(id: UUID = UUID(),
+                          name: String = "name",
+                          location: String = "location",
+                          distance: Float = 4.5,
+                          ratings: Int = 4,
+                          parasols: Int = 10
+    ) -> (mode: RestaurantItem, json: [String: Any]) {
+        let item = RestaurantItem(id: id,
+                                  name: name,
+                                  location: location,
+                                  distance: distance,
+                                  ratings: ratings,
+                                  parasols: parasols)
+        
+        let itemJson: [String: Any] = [
+            "id": item.id.uuidString,
+            "name": item.name,
+            "location": item.location,
+            "distance": item.distance,
+            "ratings": item.ratings,
+            "parasols": item.parasols
+        ]
+        
+        return (item, itemJson)
     }
 }
 
