@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9221018329C8D5F4003B9F73 /* RemoteRestaurantLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9221018229C8D5F4003B9F73 /* RemoteRestaurantLoaderTests.swift */; };
 		926F0B0C299DC92C007E2FDE /* RestaurantDomain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 926F0B03299DC92C007E2FDE /* RestaurantDomain.framework */; };
 		926F0B11299DC92C007E2FDE /* RestaurantDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926F0B10299DC92C007E2FDE /* RestaurantDomainTests.swift */; };
 		926F0B12299DC92C007E2FDE /* RestaurantDomain.h in Headers */ = {isa = PBXBuildFile; fileRef = 926F0B06299DC92C007E2FDE /* RestaurantDomain.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -25,6 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9221018229C8D5F4003B9F73 /* RemoteRestaurantLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteRestaurantLoaderTests.swift; sourceTree = "<group>"; };
 		926F0B03299DC92C007E2FDE /* RestaurantDomain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RestaurantDomain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		926F0B06299DC92C007E2FDE /* RestaurantDomain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RestaurantDomain.h; sourceTree = "<group>"; };
 		926F0B0B299DC92C007E2FDE /* RestaurantDomainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RestaurantDomainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				926F0B10299DC92C007E2FDE /* RestaurantDomainTests.swift */,
+				9221018229C8D5F4003B9F73 /* RemoteRestaurantLoaderTests.swift */,
 			);
 			path = RestaurantDomainTests;
 			sourceTree = "<group>";
@@ -208,6 +211,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				926F0B11299DC92C007E2FDE /* RestaurantDomainTests.swift in Sources */,
+				9221018329C8D5F4003B9F73 /* RemoteRestaurantLoaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
