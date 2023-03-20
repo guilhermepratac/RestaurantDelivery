@@ -1,9 +1,6 @@
 import Foundation
 
-enum NetworkState {
-    case sucess
-    case error(Error)
-}
 protocol NetworkClient {
-    func request(from url: URL, completion: @escaping (NetworkState) -> Void )
+    typealias NetworkResult = Result<(Data, HTTPURLResponse), Error>
+    func request(from url: URL, completion: @escaping (NetworkResult) -> Void )
 }
