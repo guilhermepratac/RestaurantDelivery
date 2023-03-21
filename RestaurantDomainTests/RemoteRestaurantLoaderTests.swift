@@ -121,7 +121,22 @@ final class RemoteRestaurantLoaderTests: XCTestCase {
         XCTAssertEqual(returnedResult, .failure(.invalidData))
     }
 
+    func test_load_not_returned_after_sut_deallocated() throws {
+        let anyURL: URL = URL(string: "https://comitando.com.br")!
+        let client = NetworkClientSpy()
+        var sut: RemoteRestaurantLoader? = RemoteRestaurantLoader(url: anyURL, networkClient: client)
 
+        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
+        sut?.load(completion: { result in
+            returnedResult = result
+        })
+        
+        sut = nil
+        client.completionWithSucess()
+        
+        XCTAssertNil(returnedResult)
+    }
+    
 }
 
 private extension RemoteRestaurantLoaderTests {
@@ -130,12 +145,21 @@ private extension RemoteRestaurantLoaderTests {
         anyURL: URL
     )
     
-    func makeSUT() -> (sut: RemoteRestaurantLoader, Doubles) {
+    func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: RemoteRestaurantLoader, Doubles) {
         let anyURL: URL = URL(string: "https://comitando.com.br")!
         let client = NetworkClientSpy()
         let sut = RemoteRestaurantLoader(url: anyURL, networkClient: client)
+        trackForMemoryLeak(client, file: file, line: line)
+        trackForMemoryLeak(sut, file: file, line: line)
         
         return (sut,(client,anyURL))
+    }
+    
+    
+    func trackForMemoryLeak(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
+        addTeardownBlock { [weak instance] in
+            XCTAssertNil(instance, "A instancia deveria ter sido desalocada, possível vazamento de memória", file: file, line: line)
+        }
     }
     
     private func emptyData() -> Data{
