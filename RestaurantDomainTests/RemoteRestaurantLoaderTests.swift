@@ -24,101 +24,52 @@ final class RemoteRestaurantLoaderTests: XCTestCase {
     func test_load_and_returned_error_for_invalidData() throws {
         let (sut, Doubles) = makeSUT()
 
-        let exp = expectation(description: "Esperando retorno da closure")
-        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
-        sut.load() { result in
-            returnedResult = result
-            exp.fulfill()
+        assert(sut, client: Doubles.client, completion: .failure(.invalidData)) {
+            Doubles.client.completionWithSucess()
         }
-        Doubles.client.completionWithSucess()
-
-        
-        wait(for: [exp], timeout: 1.0)
-                
-        XCTAssertEqual(returnedResult, .failure(.invalidData))
     }
     
     func test_load_and_returned_error_for_connectivitiy() throws {
         let (sut, Doubles) = makeSUT()
         
-        let exp = expectation(description: "Esperando retorno da closure")
-        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
-        sut.load() { result in
-            returnedResult = result
-            exp.fulfill()
+        assert(sut, client: Doubles.client, completion: .failure(.connectivitiy)) {
+            Doubles.client.completionWithError()
         }
-        Doubles.client.completionWithError()
-
-        
-        wait(for: [exp], timeout: 1.0)
-                
-        XCTAssertEqual(returnedResult, .failure(.connectivitiy))
     }
     
     func test_load_and_returned_sucess_with_empaty_List() throws {
         let (sut, Doubles) = makeSUT()
         
-        let exp = expectation(description: "Esperando retorno da closure")
-        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
-        sut.load() { result in
-            returnedResult = result
-            exp.fulfill()
+        assert(sut, client: Doubles.client, completion: .success([])) {
+            Doubles.client.completionWithSucess(data: emptyData())
         }
-        
-        
-        Doubles.client.completionWithSucess(data: emptyData())
-
-        
-        wait(for: [exp], timeout: 1.0)
-                
-        XCTAssertEqual(returnedResult, .success([]))
     }
     
     func test_load_and_returned_sucess_with_restaurant_item_list() throws {
         let (sut, Doubles) = makeSUT()
-        
-        let exp = expectation(description: "Esperando retorno da closure")
-        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
-        
-        sut.load() { result in
-            returnedResult = result
-            exp.fulfill()
-        }
-        
+
         let (model1, json1) = makeItem()
         let (model2, json2) = makeItem()
         let (model3, json3) = makeItem()
-
         let jsonItem = ["items": [json1, json2, json3]]
         let data = try XCTUnwrap(JSONSerialization.data(withJSONObject: jsonItem))
         
-        Doubles.client.completionWithSucess(data: data)
-        
-        wait(for: [exp], timeout: 1.0)
-                
-        XCTAssertEqual(returnedResult, .success([model1, model2, model3]))
+        assert(sut, client: Doubles.client, completion: .success([model1, model2, model3])) {
+            Doubles.client.completionWithSucess(data: data)
+        }
     }
     
     func test_load_and_returned_error_for_invalid_statusCode() throws {
         let (sut, Doubles) = makeSUT()
-
-        let exp = expectation(description: "Esperando retorno da closure")
-        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
-        sut.load() { result in
-            returnedResult = result
-            exp.fulfill()
-        }
         
         let (_, json1) = makeItem()
 
         let jsonItem = ["items": [json1]]
         let data = try XCTUnwrap(JSONSerialization.data(withJSONObject: jsonItem))
-        Doubles.client.completionWithSucess(statusCode: 201, data: data)
-
         
-        wait(for: [exp], timeout: 1.0)
-                
-        XCTAssertEqual(returnedResult, .failure(.invalidData))
+        assert(sut, client: Doubles.client, completion: .failure(.invalidData)) {
+            Doubles.client.completionWithSucess(statusCode: 201, data: data)
+        }
     }
 
     func test_load_not_returned_after_sut_deallocated() throws {
@@ -162,11 +113,11 @@ private extension RemoteRestaurantLoaderTests {
         }
     }
     
-    private func emptyData() -> Data{
+    func emptyData() -> Data{
         return Data("{ \"items\":[] }".utf8)
     }
     
-    private func makeItem(id: UUID = UUID(),
+    func makeItem(id: UUID = UUID(),
                           name: String = "name",
                           location: String = "location",
                           distance: Float = 4.5,
@@ -190,6 +141,28 @@ private extension RemoteRestaurantLoaderTests {
         ]
         
         return (item, itemJson)
+    }
+    
+    func assert(
+        _ sut: RemoteRestaurantLoader,
+        client: NetworkClientSpy,
+        completion result: RemoteRestaurantLoader.RemoteRestaurantResult,
+        when action: () -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let exp = expectation(description: "Esperando retorno da closure")
+        var returnedResult: RemoteRestaurantLoader.RemoteRestaurantResult?
+        sut.load(completion: { result in
+            returnedResult = result
+            exp.fulfill()
+        })
+        
+        action()
+        
+        wait(for: [exp], timeout: 1.0)
+                
+        XCTAssertEqual(returnedResult, result)
     }
 }
 
