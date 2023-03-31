@@ -13,6 +13,8 @@ final class NetworkService: NetworkClient {
     }
     
     func request(from url: URL, completion: @escaping (NetworkResult) -> Void) {
-        
+        session.dataTask(with: url) { _, _, _ in
+            
+        }.resume()
     }
 }
