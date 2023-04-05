@@ -8,43 +8,6 @@
 import XCTest
 @testable import RestaurantDomain
 
-final class URLSessionSpy: URLSession {
-    //Esse stubs serve para que possamos saber se DataTask pertence a URL passada, caso haja duas chamadas precisamos garantir que retorno 1 seja da url 1
-    private(set) var stubs: [URL: Stub] = [:]
-    
-    struct Stub {
-        let task: URLSessionDataTask
-        let data: Data?
-        let response: URLResponse?
-        let error: Error?
-    }
- 
-    override func dataTask(with url: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
-        guard let stub = stubs[url] else {
-            return FakeURLSessionDataTaskSpy()
-        }
-        
-        completionHandler(nil, nil, stub.error)
-        return stub.task
-    }
-    
-    func stub(with url: URL, task: URLSessionDataTask, data: Data? = nil, response: URLResponse? = nil, error: Error? = nil) {
-        stubs[url] = Stub(task: task, data: data, response: response, error: error)
-    }
-}
-
-final class URLSessionDataTaskSpy: URLSessionDataTask {
-    
-    private(set) var resumeCont: Int = 0
-    override func resume() {
-        resumeCont += 1
-    }
-}
-
-final class FakeURLSessionDataTaskSpy: URLSessionDataTask {
-    override func resume() { }
-}
-
 final class NetworkServiceTests: XCTestCase {
     func test_request_and_resume_dataTask_with_url() throws {
         let (sut, Doubles) = makeSUT()
@@ -55,33 +18,46 @@ final class NetworkServiceTests: XCTestCase {
         XCTAssertEqual(Doubles.task.resumeCont, 1)
     }
     
-    func test_request_and_completion_with_error() throws{
+    func test_request_and_completion_with_error_for_invalidCases() throws{
+        let url = URL(string: "https://comitando.com.br")!
+
         let anyError = NSError(domain: "any error", code: -1)
-        let returnedResult = assert(data: nil, response: nil, error: anyError)
+        let returnedResult = assert(url: url, data: nil, response: nil, error: anyError)
+        let httpResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        let urlResponse = URLResponse(url: url, mimeType: nil, expectedContentLength: 1, textEncodingName: nil)
+        let data = Data()
+
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: nil, error: nil))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: urlResponse, error: nil))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: httpResponse, error: nil))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: data, response: nil, error: nil))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: data, response: nil, error: anyError))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: urlResponse, error: anyError))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: httpResponse, error: anyError))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: data, response: urlResponse, error: anyError))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: data, response: httpResponse, error: anyError))
+        XCTAssertNotNil(resultErrorForInvalidCases(data: nil, response: nil, error: anyError))
         
-        switch returnedResult {
-        case let .failure(returnedError):
-            XCTAssertEqual(returnedError as? NSError, anyError)
-        default:
-            XCTFail("Esperando falha mas retorno \(String(describing: returnedResult))")
-        }
+        let result = resultErrorForInvalidCases(data: nil, response: nil, error: anyError)
+        XCTAssertEqual(result as? NSError, anyError)
+
     }
     
-    func test_request_and_completion_with_sucess() throws{
-        let (_, Doubles) = makeSUT()
-
+    func test_request_and_completion_with_sucess_for_valid_cases() throws{
+        let url = URL(string: "https://comitando.com.br")!
         let data = Data()
-        let response = HTTPURLResponse(url: Doubles.anyURL, statusCode: 200, httpVersion: nil, headerFields: nil)
-        let returnedResult = assert(data: data, response: response, error: nil)
+        let okResponse = 200
+        let response = HTTPURLResponse(url: url, statusCode: okResponse, httpVersion: nil, headerFields: nil)
         
-        switch returnedResult {
-        case let .success((returnedData, returnedResponse)):
-            XCTAssertEqual(returnedData, data)
-            XCTAssertEqual(returnedResponse, response)
+        XCTAssertNotNil(resultSucessForValidCases(data: data, response: response, error: nil))
+        
+        let result = resultSucessForValidCases(data: data, response: response, error: nil)
+        
+        XCTAssertEqual(result?.data, data)
+        XCTAssertEqual(result?.response.url, url)
+        XCTAssertEqual(result?.response.statusCode, response?.statusCode)
 
-        default:
-            XCTFail("Esperando sucesso mas retorno \(String(describing: returnedResult))")
-        }
+
     }
 }
 
@@ -103,13 +79,8 @@ private extension NetworkServiceTests {
         return (sut,(session, anyURL, task))
     }
     
-    func trackForMemoryLeak(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
-        addTeardownBlock { [weak instance] in
-            XCTAssertNil(instance, "A instancia deveria ter sido desalocada, possível vazamento de memória", file: file, line: line)
-        }
-    }
-    
     private func assert(
+        url: URL,
         data: Data?,
         response: URLResponse?,
         error: Error?,
@@ -118,7 +89,6 @@ private extension NetworkServiceTests {
     ) -> NetworkService.NetworkResult? {
 
         let (sut, Doubles) = makeSUT()
-        let url = URL(string: "https://comitando.com.br")!
         Doubles.session.stub(with: url, task: Doubles.task, data: data, response: response, error: error)
 
         let exp = expectation(description: "aguardando retorno da clousure")
@@ -132,4 +102,43 @@ private extension NetworkServiceTests {
 
         return returnedResult
     }
+    
+    func resultErrorForInvalidCases(data: Data?,
+                                    response: URLResponse?,
+                                    error: Error?,
+                                    file: StaticString = #filePath,
+                                    line: UInt = #line) -> Error? {
+        let url = URL(string: "https://comitando.com.br")!
+
+        let result = assert(url: url, data: data, response: response, error: error)
+        
+        switch result {
+        case let .failure(returnedError):
+            return returnedError
+        default:
+            XCTFail("Esperando falha mas retorno \(String(describing: result))")
+        }
+        
+        return nil
+    }
+    
+    func resultSucessForValidCases(data: Data?,
+                                   response: URLResponse?,
+                                   error: Error?,
+                                   file: StaticString = #filePath,
+                                   line: UInt = #line) -> (data: Data, response: HTTPURLResponse)? {
+        let url = URL(string: "https://comitando.com.br")!
+
+        let result = assert(url: url, data: data, response: response, error: error)
+        
+        switch result {
+        case let .success((returnedData, returnedResponse)):
+            return (returnedData, returnedResponse)
+        default:
+            XCTFail("Esperando sucesso mas retorno \(String(describing: result))")
+        }
+        
+        return nil
+    }
+    
 }
