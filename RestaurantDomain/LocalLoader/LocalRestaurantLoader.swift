@@ -32,11 +32,15 @@ import Foundation
 protocol CacheClient {
     typealias SaveResult = (Error?) -> Void
     typealias DeleteResult = (Error?) -> Void
+    typealias LoadResult = (Error?) -> Void
+    
     func save(_ items: [RestaurantItem], timestamp: Date, completion: @escaping SaveResult)
     func delete(completion: @escaping DeleteResult)
+    func load(completion: @escaping LoadResult)
 }
 
-final class LocalRestaurantLoader: RestaurantLoader {
+final class LocalRestaurantLoader {
+    
     let cache: CacheClient
     let currentDate: () -> Date
     
@@ -51,21 +55,32 @@ final class LocalRestaurantLoader: RestaurantLoader {
         self.currentDate = currentDate
     }
     
-    func load(completion: @escaping (Result<[RestaurantItem], RestaurantResultError>) -> Void) {
-        
-    }
-    
     func save(_ items: [RestaurantItem], completion: @escaping (Error?) -> Void) {
-        cache.delete { [unowned self] error in
-            if error == nil {
-                self.cache.save(items, timestamp: self.currentDate(), completion: completion)
-            } else {
-                completion(error)
+        cache.delete { [weak self] error in
+            guard let self else { return }
+            guard let error else {
+                return self.saveOnCache(items, completion: completion)
             }
+            completion(error)
         }
     }
     
-    private func saveOnCache() {
-        
+    private func saveOnCache(_ items: [RestaurantItem], completion: @escaping (Error?) -> Void) {
+        cache.save(items, timestamp: currentDate()) { [weak self] error in
+            guard self != nil else { return }
+            completion(error)
+        }
+    }
+}
+
+extension LocalRestaurantLoader: RestaurantLoader {
+    func load(completion: @escaping (Result<[RestaurantItem], RestaurantResultError>) -> Void) {
+        cache.load { error in
+            if error != nil {
+                completion(.success([]))
+            } else {
+                completion(.failure(.invalidData))
+            }
+        }
     }
 }

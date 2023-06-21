@@ -1,5 +1,5 @@
 //
-//  LocalRestaurantLoader.swift
+//  LocalRestaurantLoaderForSaveCommandTests.swift
 //  RestaurantDomainTests
 //
 //  Created by Guilherme Prata Costa on 21/06/23.
@@ -8,7 +8,7 @@
 import XCTest
 @testable import RestaurantDomain
 
-final class LocalRestaurantLoaderTests: XCTestCase {
+final class LocalRestaurantLoaderForSaveCommandTests: XCTestCase {
     func test_save_delete_old_cache() {
         let ( sut, Doubles ) = makeSUT()
         let (model, _) = makeItem()
@@ -32,7 +32,7 @@ final class LocalRestaurantLoaderTests: XCTestCase {
     }
 }
 
-private extension LocalRestaurantLoaderTests {
+private extension LocalRestaurantLoaderForSaveCommandTests {
     typealias Doubles = (
         cache: CacheClientSpy,
         currentDate: Date
@@ -45,11 +45,6 @@ private extension LocalRestaurantLoaderTests {
         trackForMemoryLeak(sut, file: file, line: line)
         
         return (sut,(cache, currentDate))
-    }
-
-    
-    func emptyData() -> Data{
-        return Data("{ \"items\":[] }".utf8)
     }
     
     func makeItem(id: UUID = UUID(),
@@ -76,50 +71,5 @@ private extension LocalRestaurantLoaderTests {
         ]
         
         return (item, itemJson)
-    }
-    
-    func assert(
-        _ sut: LocalRestaurantLoader,
-        cache: CacheClientSpy,
-        items: [RestaurantItem],
-        error: Error? = nil,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) {
-        let exp = expectation(description: "Esperando retorno da closure")
-        sut.save(items) { _ in
-            exp.fulfill()
-        }
-        cache.completionHandlerForDelete(error)
-        
-        wait(for: [exp], timeout: 1.0)
-                
-        //XCTAssertEqual(returnedResult, result)
-    }
-}
-
-final class CacheClientSpy: CacheClient {
-    
-    enum Messages: Equatable {
-        case delete
-        case save([RestaurantItem], Date)
-    }
-    
-    private(set) var messages: [Messages] = []
-    
-    private(set) var saveCount = 0
-    func save(_ items: [RestaurantDomain.RestaurantItem], timestamp: Date, completion: @escaping (Error?) -> Void) {
-        messages.append(.save(items, timestamp))
-    }
-    
-    private(set) var deleteCount = 0
-    private var completionHandler: ((Error?) -> Void)?
-    func delete(completion: @escaping (Error?) -> Void) {
-        completionHandler = completion
-        messages.append(.delete)
-    }
-    
-    func completionHandlerForDelete(_ error: Error? = nil) {
-        completionHandler?(error)
     }
 }
