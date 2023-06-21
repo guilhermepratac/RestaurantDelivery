@@ -16,19 +16,19 @@ final class LocalRestaurantLoaderTests: XCTestCase {
         
         sut.save(items) { _ in }
         
-        XCTAssertEqual(Doubles.cache.deleteCount, 1)
+        XCTAssertEqual(Doubles.cache.messages, [.delete])
     }
     
     func test_saveCommand_insert_new_data_on_cache() {
-        let ( sut, Doubles ) = makeSUT()
+        let currentDate: Date = Date()
+        let ( sut, Doubles ) = makeSUT(currentDate: currentDate)
         let (model, _) = makeItem()
         let items: [RestaurantItem] = [model]
         
         sut.save(items) { _ in }
         Doubles.cache.completionHandlerForDelete()
         
-        XCTAssertEqual(Doubles.cache.deleteCount, 1)
-        XCTAssertEqual(Doubles.cache.saveCount, 1)
+        XCTAssertEqual(Doubles.cache.messages, [.delete, .save(items, currentDate)])
     }
 }
 
@@ -38,14 +38,13 @@ private extension LocalRestaurantLoaderTests {
         currentDate: Date
     )
     
-    func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: LocalRestaurantLoader, Doubles) {
-        let currentDate = Date()
-        let client = CacheClientSpy()
-        let sut = LocalRestaurantLoader(cache: client, currentDate: { currentDate })
-        trackForMemoryLeak(client, file: file, line: line)
+    func makeSUT(currentDate: Date = Date(), file: StaticString = #file, line: UInt = #line) -> (sut: LocalRestaurantLoader, Doubles) {
+        let cache = CacheClientSpy()
+        let sut = LocalRestaurantLoader(cache: cache, currentDate: { currentDate })
+        trackForMemoryLeak(cache, file: file, line: line)
         trackForMemoryLeak(sut, file: file, line: line)
         
-        return (sut,(client, currentDate))
+        return (sut,(cache, currentDate))
     }
 
     
@@ -81,21 +80,17 @@ private extension LocalRestaurantLoaderTests {
     
     func assert(
         _ sut: LocalRestaurantLoader,
-        client: CacheClientSpy,
+        cache: CacheClientSpy,
         items: [RestaurantItem],
-        completion result: (Error?) -> Void,
-        when action: () -> Void,
+        error: Error? = nil,
         file: StaticString = #file,
         line: UInt = #line
     ) {
         let exp = expectation(description: "Esperando retorno da closure")
-        //var returnedResult: (Error?) -> Void
-        sut.save(items, completion: { result in
-            //returnedResult = result
+        sut.save(items) { _ in
             exp.fulfill()
-        })
-        
-        action()
+        }
+        cache.completionHandlerForDelete(error)
         
         wait(for: [exp], timeout: 1.0)
                 
@@ -105,16 +100,23 @@ private extension LocalRestaurantLoaderTests {
 
 final class CacheClientSpy: CacheClient {
     
+    enum Messages: Equatable {
+        case delete
+        case save([RestaurantItem], Date)
+    }
+    
+    private(set) var messages: [Messages] = []
+    
     private(set) var saveCount = 0
     func save(_ items: [RestaurantDomain.RestaurantItem], timestamp: Date, completion: @escaping (Error?) -> Void) {
-        saveCount += 1
+        messages.append(.save(items, timestamp))
     }
     
     private(set) var deleteCount = 0
     private var completionHandler: ((Error?) -> Void)?
     func delete(completion: @escaping (Error?) -> Void) {
-        deleteCount += 1
         completionHandler = completion
+        messages.append(.delete)
     }
     
     func completionHandlerForDelete(_ error: Error? = nil) {
