@@ -18,6 +18,18 @@ final class LocalRestaurantLoaderTests: XCTestCase {
         
         XCTAssertEqual(Doubles.cache.deleteCount, 1)
     }
+    
+    func test_saveCommand_insert_new_data_on_cache() {
+        let ( sut, Doubles ) = makeSUT()
+        let (model, _) = makeItem()
+        let items: [RestaurantItem] = [model]
+        
+        sut.save(items) { _ in }
+        Doubles.cache.completionHandlerForDelete()
+        
+        XCTAssertEqual(Doubles.cache.deleteCount, 1)
+        XCTAssertEqual(Doubles.cache.saveCount, 1)
+    }
 }
 
 private extension LocalRestaurantLoaderTests {
@@ -92,12 +104,20 @@ private extension LocalRestaurantLoaderTests {
 }
 
 final class CacheClientSpy: CacheClient {
+    
+    private(set) var saveCount = 0
     func save(_ items: [RestaurantDomain.RestaurantItem], timestamp: Date, completion: @escaping (Error?) -> Void) {
-        
+        saveCount += 1
     }
     
     private(set) var deleteCount = 0
+    private var completionHandler: ((Error?) -> Void)?
     func delete(completion: @escaping (Error?) -> Void) {
         deleteCount += 1
+        completionHandler = completion
+    }
+    
+    func completionHandlerForDelete(_ error: Error? = nil) {
+        completionHandler?(error)
     }
 }
