@@ -106,13 +106,6 @@ private extension RemoteRestaurantLoaderTests {
         return (sut,(client,anyURL))
     }
     
-    
-    func trackForMemoryLeak(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
-        addTeardownBlock { [weak instance] in
-            XCTAssertNil(instance, "A instancia deveria ter sido desalocada, possível vazamento de memória", file: file, line: line)
-        }
-    }
-    
     func emptyData() -> Data{
         return Data("{ \"items\":[] }".utf8)
     }
