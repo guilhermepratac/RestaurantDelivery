@@ -73,7 +73,6 @@
 		922052EE2A43A5D100A6C76C /* RemoteLoader */ = {
 			isa = PBXGroup;
 			children = (
-				92F6A03E29CA63EE00921AA1 /* RestaurantItem.swift */,
 				92772476299F0DBD00A5034B /* NetworkClient.swift */,
 				92772474299F0D7000A5034B /* RemoteRestaurantLoader.swift */,
 			);
@@ -138,6 +137,7 @@
 		926F0B05299DC92C007E2FDE /* RestaurantDomain */ = {
 			isa = PBXGroup;
 			children = (
+				92F6A03E29CA63EE00921AA1 /* RestaurantItem.swift */,
 				922052EF2A43A5EC00A6C76C /* LocalLoader */,
 				922052EE2A43A5D100A6C76C /* RemoteLoader */,
 				926F0B06299DC92C007E2FDE /* RestaurantDomain.h */,

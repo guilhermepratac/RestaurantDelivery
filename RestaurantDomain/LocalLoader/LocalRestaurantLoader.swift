@@ -39,6 +39,10 @@ final class LocalRestaurantLoader {
     let cache: CacheClient
     let currentDate: () -> Date
     
+    /*
+     Controlando nosso tempo de cache nos testes de forma mais eficiente
+     O Date() não é uma função pura porque toda vez que você cria uma instância de Data, ela tem um valor diferente - a data/hora atual, em vez de permitir que o LocalRestaurantLoader crie a data atual diretamente, podemos mover essa responsabilidade para fora do escopo da classe e injetá-la como uma dependência. Então, podemos facilmente controlar a data/hora atual durante os testes.
+     */
     init(cache: CacheClient, currentDate: @escaping () -> Date) {
         self.cache = cache
         self.currentDate = currentDate
