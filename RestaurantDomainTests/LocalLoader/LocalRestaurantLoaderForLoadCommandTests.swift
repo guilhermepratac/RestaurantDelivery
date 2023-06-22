@@ -9,26 +9,25 @@ import XCTest
 @testable import RestaurantDomain
 
 final class LocalRestaurantLoaderForLoadCommandTests: XCTestCase {
-    func test_save_delete_old_cache() {
-        let ( sut, Doubles ) = makeSUT()
-        let (model, _) = makeItem()
-        let items: [RestaurantItem] = [model]
+    func test_load_returned_completion_error() {
+        let (sut, Doubles) = makeSUT()
         
-        sut.save(items) { _ in }
+        assert(sut, completion: .failure(.invalidData)) {
+            let anyError = NSError(domain: "any error", code: -1)
+            Doubles.cache.completionHandlerForLoad(anyError)
+        }
         
-        XCTAssertEqual(Doubles.cache.messages, [.delete])
+        XCTAssertEqual(Doubles.cache.messages, [.load])
     }
     
-    func test_saveCommand_insert_new_data_on_cache() {
-        let currentDate: Date = Date()
-        let ( sut, Doubles ) = makeSUT(currentDate: currentDate)
-        let (model, _) = makeItem()
-        let items: [RestaurantItem] = [model]
+    func test_load_returned_completion_sucess() {
+        let ( sut, Doubles ) = makeSUT()
         
-        sut.save(items) { _ in }
-        Doubles.cache.completionHandlerForDelete()
+        assert(sut, completion: .success([]) ) {
+            Doubles.cache.completionHandlerForLoad()
+        }
         
-        XCTAssertEqual(Doubles.cache.messages, [.delete, .save(items, currentDate)])
+        XCTAssertEqual(Doubles.cache.messages, [.load])
     }
 }
 
@@ -53,7 +52,7 @@ private extension LocalRestaurantLoaderForLoadCommandTests {
                           distance: Float = 4.5,
                           ratings: Int = 4,
                           parasols: Int = 10
-    ) -> (mode: RestaurantItem, json: [String: Any]) {
+    ) -> RestaurantItem {
         let item = RestaurantItem(id: id,
                                   name: name,
                                   location: location,
@@ -61,15 +60,24 @@ private extension LocalRestaurantLoaderForLoadCommandTests {
                                   ratings: ratings,
                                   parasols: parasols)
         
-        let itemJson: [String: Any] = [
-            "id": item.id.uuidString,
-            "name": item.name,
-            "location": item.location,
-            "distance": item.distance,
-            "ratings": item.ratings,
-            "parasols": item.parasols
-        ]
+        return item
+    }
+    
+    private func assert(
+        _ sut: LocalRestaurantLoader,
+        completion result: (Result<[RestaurantItem], RestaurantResultError>)??,
+        when action: () -> Void,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
         
-        return (item, itemJson)
+        var returnedResult: (Result<[RestaurantItem], RestaurantResultError>)?
+        sut.load { result in
+            returnedResult = result
+        }
+        
+        action()
+        
+        XCTAssertEqual(returnedResult, result)
     }
 }

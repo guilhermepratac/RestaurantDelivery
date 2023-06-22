@@ -7,28 +7,6 @@
 
 import Foundation
 
-/*
- ### Salvar lista de restaurantes
- 
- #### Dados (Entrada):
- - Listagem de restaurantes;
- 
- #### Curso primário (caminho feliz):
- 1. Execute o comando "Salvar listagem de restaurantes" com os dados acima.
- 2. O sistema deleta o cache antigo.
- 3. O sistema codifica a lista de restaurantes.
- 4. O sistema marca a hora do novo cache.
- 5. O sistema salva o cache com novos dados.
- 6. O sistema envia uma mensagem de sucesso.
- 
- #### Caso de erro (caminho triste):
- 1. O sistema envia uma mensagem de erro.
- 
- #### Caso de erro ao salvar (caminho triste):
- 1. O sistema envia uma mensagem de erro.
- 
- */
-
 protocol CacheClient {
     typealias SaveResult = (Error?) -> Void
     typealias DeleteResult = (Error?) -> Void
@@ -76,7 +54,7 @@ final class LocalRestaurantLoader {
 extension LocalRestaurantLoader: RestaurantLoader {
     func load(completion: @escaping (Result<[RestaurantItem], RestaurantResultError>) -> Void) {
         cache.load { error in
-            if error != nil {
+            if error == nil {
                 completion(.success([]))
             } else {
                 completion(.failure(.invalidData))
