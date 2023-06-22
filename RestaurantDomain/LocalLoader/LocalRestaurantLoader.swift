@@ -7,10 +7,16 @@
 
 import Foundation
 
-protocol CacheClient {
+public enum LoadResultSate {
+    case empty
+    case sucess(_ items: [RestaurantItem], timestamp: Date)
+    case failure(Error)
+}
+
+public protocol CacheClient {
     typealias SaveResult = (Error?) -> Void
     typealias DeleteResult = (Error?) -> Void
-    typealias LoadResult = (Error?) -> Void
+    typealias LoadResult = (LoadResultSate) -> Void
     
     func save(_ items: [RestaurantItem], timestamp: Date, completion: @escaping SaveResult)
     func delete(completion: @escaping DeleteResult)
@@ -53,10 +59,13 @@ final class LocalRestaurantLoader {
 
 extension LocalRestaurantLoader: RestaurantLoader {
     func load(completion: @escaping (Result<[RestaurantItem], RestaurantResultError>) -> Void) {
-        cache.load { error in
-            if error == nil {
+        cache.load { state in
+            switch state {
+            case .empty:
                 completion(.success([]))
-            } else {
+            case let .sucess(items, _):
+                completion(.success(items))
+            case .failure:
                 completion(.failure(.invalidData))
             }
         }
