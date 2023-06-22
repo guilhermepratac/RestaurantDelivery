@@ -30,6 +30,31 @@ final class LocalRestaurantLoaderForSaveCommandTests: XCTestCase {
         
         XCTAssertEqual(Doubles.cache.messages, [.delete, .save(items, currentDate)])
     }
+    
+    func test_saveCommand_returned_error_when_delete() {
+        let ( sut, Doubles ) = makeSUT()
+        let anyError = NSError(domain: "any error", code: -1)
+        
+        assert(sut, completion: anyError) {
+            Doubles.cache.completionHandlerForDelete(anyError)
+        }
+        
+        XCTAssertEqual(Doubles.cache.messages, [.delete])
+    }
+    
+    func test_saveCommand_returned_error_when_save() {
+        let currentDate = Date()
+        let ( sut, Doubles ) = makeSUT(currentDate: currentDate)
+        let anyError = NSError(domain: "any error", code: -1)
+        let items = [makeItem()]
+        
+        assert(sut, completion: anyError, items: items) {
+            Doubles.cache.completionHandlerForDelete()
+            Doubles.cache.completionHandlerForSave(anyError)
+        }
+        
+        XCTAssertEqual(Doubles.cache.messages, [.delete, .save(items, currentDate)])
+    }
 }
 
 private extension LocalRestaurantLoaderForSaveCommandTests {
@@ -47,20 +72,22 @@ private extension LocalRestaurantLoaderForSaveCommandTests {
         return (sut,(cache, currentDate))
     }
     
-    func makeItem(id: UUID = UUID(),
-                          name: String = "name",
-                          location: String = "location",
-                          distance: Float = 4.5,
-                          ratings: Int = 4,
-                          parasols: Int = 10
-    ) -> RestaurantItem {
-        let item = RestaurantItem(id: id,
-                                  name: name,
-                                  location: location,
-                                  distance: distance,
-                                  ratings: ratings,
-                                  parasols: parasols)
+    private func assert(
+        _ sut: LocalRestaurantLoader,
+        completion error: NSError,
+        items: [RestaurantItem] = [makeItem()],
+        when action: () -> Void,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+
+        var returnedError: Error?
+        sut.save(items) { error in
+            returnedError = error
+        }
         
-        return item
+        action()
+        
+        XCTAssertEqual(returnedError as? NSError, error)
     }
 }

@@ -9,17 +9,6 @@ import XCTest
 @testable import RestaurantDomain
 
 final class LocalRestaurantLoaderForLoadCommandTests: XCTestCase {
-    func test_load_returned_completion_error() {
-        let (sut, Doubles) = makeSUT()
-        
-        assert(sut, completion: .failure(.invalidData)) {
-            let anyError = NSError(domain: "any error", code: -1)
-            Doubles.cache.completionHandlerForLoad(.failure(anyError))
-        }
-        
-        XCTAssertEqual(Doubles.cache.messages, [.load])
-    }
-    
     func test_load_returned_completion_sucess_with_empty_data() {
         let ( sut, Doubles ) = makeSUT()
         
@@ -51,6 +40,17 @@ final class LocalRestaurantLoaderForLoadCommandTests: XCTestCase {
         
         assert(sut, completion: .success([]) ) {
             Doubles.cache.completionHandlerForLoad(.sucess(items, timestamp: oneDayOldCacheDate))
+        }
+        
+        XCTAssertEqual(Doubles.cache.messages, [.load])
+    }
+    
+    func test_load_returned_completion_failure_with_error() {
+        let ( sut, Doubles ) = makeSUT()
+        
+        assert(sut, completion: .failure(.invalidData)) {
+            let anyError = NSError(domain: "any error", code: -1)
+            Doubles.cache.completionHandlerForLoad(.failure(anyError))
         }
         
         XCTAssertEqual(Doubles.cache.messages, [.load])
@@ -105,15 +105,5 @@ private extension LocalRestaurantLoaderForLoadCommandTests {
         action()
         
         XCTAssertEqual(returnedResult, result)
-    }
-}
-
-private extension Date {
-    func addinng(days: Int) -> Date {
-        return Calendar(identifier: .gregorian).date(byAdding: .day, value: days, to: self)!
-    }
-    
-    func adding(seconds: TimeInterval) -> Date {
-        return self + seconds
     }
 }

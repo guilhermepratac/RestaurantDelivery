@@ -55,6 +55,19 @@ final class LocalRestaurantLoader {
             completion(error)
         }
     }
+    
+    public func validateCache() {
+        cache.load { [weak self] state in
+            guard let self = self else { return }
+            switch state {
+            case let .sucess(_, timestamp) where !self.validate(timestamp):
+                self.cache.delete{ _ in }
+            case .failure:
+                self.cache.delete{ _ in }
+            default: break
+            }
+        }
+    }
 }
 
 extension LocalRestaurantLoader: RestaurantLoader {
