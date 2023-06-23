@@ -26,6 +26,7 @@ public protocol CacheClient {
 final class LocalRestaurantLoader {
     
     let cache: CacheClient
+    let cachePolicy: CachePolicy
     let currentDate: () -> Date
     
     /*
@@ -34,8 +35,9 @@ final class LocalRestaurantLoader {
      LocalRestaurantLoader crie a data atual diretamente, podemos mover essa responsabilidade para fora do escopo da classe e injetá-la como uma dependência. Então, podemos
      facilmente controlar a data/hora atual durante os testes.
      */
-    init(cache: CacheClient, currentDate: @escaping () -> Date) {
+    init(cache: CacheClient, cachePolicy: CachePolicy = RestaurantLoaderCachePolicy(), currentDate: @escaping () -> Date) {
         self.cache = cache
+        self.cachePolicy = cachePolicy
         self.currentDate = currentDate
     }
     
@@ -60,7 +62,7 @@ final class LocalRestaurantLoader {
         cache.load { [weak self] state in
             guard let self = self else { return }
             switch state {
-            case let .sucess(_, timestamp) where !self.validate(timestamp):
+            case let .sucess(_, timestamp) where !self.cachePolicy.validate(timestamp, with: self.currentDate()):
                 self.cache.delete{ _ in }
             case .failure:
                 self.cache.delete{ _ in }
@@ -71,18 +73,11 @@ final class LocalRestaurantLoader {
 }
 
 extension LocalRestaurantLoader: RestaurantLoader {
-    private func validate(_ timestamp: Date) -> Bool {
-        let calendar = Calendar(identifier: .gregorian)
-        guard let maxAge = calendar.date(byAdding: .day, value: 1, to: timestamp) else { return false}
-        
-        return currentDate() < maxAge
-    }
-    
     func load(completion: @escaping (Result<[RestaurantItem], RestaurantResultError>) -> Void) {
         cache.load { [weak self] state in
             guard let self = self else { return }
             switch state {
-            case let .sucess(items, timestamp) where self.validate(timestamp):
+            case let .sucess(items, timestamp) where self.cachePolicy.validate(timestamp, with: self.currentDate()):
                 completion(.success(items))
             case .sucess, .empty:
                 completion(.success([]))
