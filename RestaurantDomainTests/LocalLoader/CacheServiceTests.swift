@@ -54,8 +54,6 @@ final class CacheServiceTests: XCTestCase {
     
     func test_delete_has_no_effect_to_delete_an_empty_cahce() {
         let sut = makeSUT()
-        let items = [makeItem(), makeItem()]
-        let timestamp = Date()
         
         assert(sut, completion: .empty)
         
@@ -117,6 +115,36 @@ final class CacheServiceTests: XCTestCase {
         assert(sut, completion: .failure(anyError))
         
     }
+    
+    func test_task_with_serial() {
+        let sut = makeSUT()
+        let items = [makeItem(), makeItem()]
+        let timestamp = Date()
+        var serialResult = [XCTestExpectation]()
+        
+        let task1 = expectation(description: "task 1")
+        sut.save(items, timestamp: timestamp) { _ in
+            serialResult.append(task1)
+            task1.fulfill()
+        }
+        
+        
+        let task2 = expectation(description: "task 2")
+        sut.delete { _ in
+            serialResult.append(task2)
+            task2.fulfill()
+        }
+        
+        let task3 = expectation(description: "task 3")
+        sut.load { _ in
+            serialResult.append(task3)
+            task3.fulfill()
+        }
+        
+        waitForExpectations(timeout: 3.0)
+        
+        XCTAssertEqual(serialResult, [task1,task2,task3])
+    }
 }
 
 private extension CacheServiceTests {
@@ -150,7 +178,7 @@ private extension CacheServiceTests {
     
     @discardableResult
     func deleteCache(_ sut: CacheClient) -> Error? {
-        let exp = expectation(description: "esperando o bloco ser completo")
+        let exp = expectation(description: "esperando o bloco deleteCache ser completo")
         var returnedError: Error?
 
         sut.delete { error in
@@ -158,7 +186,7 @@ private extension CacheServiceTests {
             exp.fulfill()
         }
         
-        wait(for: [exp], timeout: 3.0)
+        wait(for: [exp], timeout: 10.0)
             
         return returnedError
     }

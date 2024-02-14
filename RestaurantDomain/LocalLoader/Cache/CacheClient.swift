@@ -30,50 +30,63 @@ final class CacheService: CacheClient {
     }
     
     private let managerUrl: URL
+    private let callbackQueue = DispatchQueue(label: "\(CacheService.self).CallbackQueue", qos: .userInitiated, attributes: .concurrent)
     
     init(managerUrl: URL) {
         self.managerUrl = managerUrl
     }
     
     func save(_ items: [RestaurantItem], timestamp: Date, completion: @escaping SaveResult) {
-        do {
-            let cache = Cache(items: items, timestamp: timestamp)
-            
-            let encoder = JSONEncoder()
-            let encoded = try encoder.encode(cache)
-            try encoded.write(to: managerUrl)
-            
-            completion(nil)
-        } catch {
-            completion(error)
+        let managerUrl = self.managerUrl
+
+        callbackQueue.async(flags: .barrier) {
+            do {
+                let cache = Cache(items: items, timestamp: timestamp)
+                
+                let encoder = JSONEncoder()
+                let encoded = try encoder.encode(cache)
+                try encoded.write(to: managerUrl)
+                
+                completion(nil)
+            } catch {
+                completion(error)
+            }
         }
     }
     
     func delete(completion: @escaping DeleteResult) {
-        guard FileManager.default.fileExists(atPath: managerUrl.path) else {
-            return completion(nil)
-        }
-        
-        do {
-            try FileManager.default.removeItem(at: managerUrl)
-            completion(nil)
-        } catch {
-            completion(error)
+        let managerUrl = self.managerUrl
+
+        callbackQueue.async(flags: .barrier) {
+            guard FileManager.default.fileExists(atPath: managerUrl.path) else {
+                return completion(nil)
+            }
+            
+            do {
+                try FileManager.default.removeItem(at: managerUrl)
+                completion(nil)
+            } catch {
+                completion(error)
+            }
         }
     }
     
     func load(completion: @escaping LoadResult) {
-        guard let data = try? Data(contentsOf: managerUrl) else {
-            return completion(.empty)
-        }
-        
-        do {
-            let decoder = JSONDecoder()
-            let cache = try decoder.decode(Cache.self, from: data)
+        let managerUrl = self.managerUrl
+
+        callbackQueue.async {
+            guard let data = try? Data(contentsOf: managerUrl) else {
+                return completion(.empty)
+            }
             
-            completion(.sucess(cache.items, timestamp: cache.timestamp))
-        } catch {
-            completion(.failure(error))
+            do {
+                let decoder = JSONDecoder()
+                let cache = try decoder.decode(Cache.self, from: data)
+                
+                completion(.sucess(cache.items, timestamp: cache.timestamp))
+            } catch {
+                completion(.failure(error))
+            }
         }
     }
     
