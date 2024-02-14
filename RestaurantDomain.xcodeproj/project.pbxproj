@@ -25,6 +25,7 @@
 		92A3F16429DE302E00CA7826 /* URLSessionSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A3F16329DE302E00CA7826 /* URLSessionSpy.swift */; };
 		92A3F16629DE307B00CA7826 /* XCTestCase+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A3F16529DE307B00CA7826 /* XCTestCase+Helpers.swift */; };
 		92A3F16829DE30C300CA7826 /* URLSessionDataTaskSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A3F16729DE30C300CA7826 /* URLSessionDataTaskSpy.swift */; };
+		92C2647B2B6AC12600E6A27D /* CacheServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92C2647A2B6AC12600E6A27D /* CacheServiceTests.swift */; };
 		92F59D8329D76CFA0075C049 /* NetworkServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F59D8229D76CFA0075C049 /* NetworkServiceTests.swift */; };
 		92F6A03F29CA63EE00921AA1 /* RestaurantItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F6A03E29CA63EE00921AA1 /* RestaurantItem.swift */; };
 		92F6A04129CA643000921AA1 /* NetworkSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F6A04029CA643000921AA1 /* NetworkSpy.swift */; };
@@ -60,6 +61,7 @@
 		92A3F16329DE302E00CA7826 /* URLSessionSpy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionSpy.swift; sourceTree = "<group>"; };
 		92A3F16529DE307B00CA7826 /* XCTestCase+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Helpers.swift"; sourceTree = "<group>"; };
 		92A3F16729DE30C300CA7826 /* URLSessionDataTaskSpy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionDataTaskSpy.swift; sourceTree = "<group>"; };
+		92C2647A2B6AC12600E6A27D /* CacheServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheServiceTests.swift; sourceTree = "<group>"; };
 		92F59D8229D76CFA0075C049 /* NetworkServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkServiceTests.swift; sourceTree = "<group>"; };
 		92F6A03E29CA63EE00921AA1 /* RestaurantItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestaurantItem.swift; sourceTree = "<group>"; };
 		92F6A04029CA643000921AA1 /* NetworkSpy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpy.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				922052FB2A43C11700A6C76C /* LocalRestaurantLoaderForLoadCommandTests.swift */,
 				9281CB222A450F2100D7C350 /* LocalRestaurantLoaderForValidateCacheCommandTests.swift */,
 				922052F92A43C0C800A6C76C /* CacheClientSpy.swift */,
+				92C2647A2B6AC12600E6A27D /* CacheServiceTests.swift */,
 			);
 			path = LocalLoader;
 			sourceTree = "<group>";
@@ -311,6 +314,7 @@
 			files = (
 				92A3F16629DE307B00CA7826 /* XCTestCase+Helpers.swift in Sources */,
 				922052F62A43AA1F00A6C76C /* LocalRestaurantLoaderForSaveCommandTests.swift in Sources */,
+				92C2647B2B6AC12600E6A27D /* CacheServiceTests.swift in Sources */,
 				92F6A04129CA643000921AA1 /* NetworkSpy.swift in Sources */,
 				922052FC2A43C11700A6C76C /* LocalRestaurantLoaderForLoadCommandTests.swift in Sources */,
 				92A3F16829DE30C300CA7826 /* URLSessionDataTaskSpy.swift in Sources */,

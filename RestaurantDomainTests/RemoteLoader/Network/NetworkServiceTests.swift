@@ -22,7 +22,7 @@ final class NetworkServiceTests: XCTestCase {
         let url = URL(string: "https://comitando.com.br")!
 
         let anyError = NSError(domain: "any error", code: -1)
-        let returnedResult = assert(url: url, data: nil, response: nil, error: anyError)
+        let _ = assert(url: url, data: nil, response: nil, error: anyError)
         let httpResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
         let urlResponse = URLResponse(url: url, mimeType: nil, expectedContentLength: 1, textEncodingName: nil)
         let data = Data()
