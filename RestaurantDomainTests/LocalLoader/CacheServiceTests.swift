@@ -9,25 +9,24 @@ import XCTest
 @testable import RestaurantDomain
 
 final class CacheServiceTests: XCTestCase {
+    
+    override func setUp() {
+        super.setUp()
+
+        try? FileManager.default.removeItem(at: validManagerURL() )
+    }
 
     func save_and_returned_last_entered_value() {
-        let path = type(of: self)
-        let managerUrl: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appending(path: "\(path)")
-        
-        let sut = CacheService(managerUrl: managerUrl)
+        let sut = makeSUT()
         let items = [makeItem(), makeItem()]
         let timestamp = Date()
         
-        let returnedError = insert(sut, items: items, timestamp: timestamp)
-        
-        XCTAssertNil(returnedError)
+        insert(sut, items: items, timestamp: timestamp)
+        assert(sut, completion: .sucess(items, timestamp: timestamp))
     }
     
     func test_save_twice_and_returned_last_entered_value() {
-        let path = type(of: self)
-        let managerUrl: URL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appending(path: "\(path)")
-        
-        let sut = CacheService(managerUrl: managerUrl)
+        let sut = makeSUT()
         let firstTimeItems = [makeItem(), makeItem()]
         let firstTimeTimestamp = Date()
         
@@ -40,11 +39,102 @@ final class CacheServiceTests: XCTestCase {
         
         assert(sut, completion: .sucess(secondTimeItems, timestamp: secondTimeTimestamp))
     }
+    
+    func test_save_error_when_invalid_manager_url() {
+        let manager = invalidManagerURL()
+        let sut = makeSUT(managerURL: manager)
+        let items = [makeItem(), makeItem()]
+        let timestamp = Date()
+        
+        let returnedError = insert(sut, items: items, timestamp: timestamp)
+        
+        XCTAssertNotNil(returnedError)
+    }
+    
+    
+    func test_delete_has_no_effect_to_delete_an_empty_cahce() {
+        let sut = makeSUT()
+        let items = [makeItem(), makeItem()]
+        let timestamp = Date()
+        
+        assert(sut, completion: .empty)
+        
+        let returnedError = deleteCache(sut)
+        
+        XCTAssertNil(returnedError)
+    }
+    
+    func test_delete_returned_empty_after_insert_new_data_cache() {
+        let sut = makeSUT()
+        let items = [makeItem(), makeItem()]
+        let timestamp = Date()
+        insert(sut, items: items, timestamp: timestamp)
+        
+        deleteCache(sut)
+        
+        assert(sut, completion: .empty)
+    }
+    
+    func test_delete_returned_error_when_not_permission() {
+        let sut = makeSUT(managerURL: invalidManagerURL())
+        
+        let returnedError = deleteCache(sut)
+        
+        XCTAssertNotNil(returnedError)
+    }
+    
+    func test_load_returned_empty_cachen() {
+        let sut = makeSUT()
+        
+        assert(sut, completion: .empty)
+    }
+    
+    func test_load_returned_same_empty_cache_for_called_twice() {
+        let sut = makeSUT()
+        let sameResult: LoadResultState = .empty
+        
+        assert(sut, completion: sameResult)
+        assert(sut, completion: sameResult)
+    }
+    
+    func test_load_return_data_after_insert_data() {
+        let sut = makeSUT()
+        let items = [makeItem(), makeItem()]
+        let timestamp = Date()
+        
+        insert(sut, items: items, timestamp: timestamp)
+        assert(sut, completion: .sucess(items, timestamp: timestamp))
+    }
+    
+    func test_load_returned_error_when_non_decode_data_cache() {
+        let manager = validManagerURL()
+        let sut = makeSUT(managerURL: manager)
+        let anyError = NSError(domain: "anyerror", code: -1)
+        
+        
+        try? "invalidData".write(to: manager, atomically: false, encoding: .utf8)
+        
+        assert(sut, completion: .failure(anyError))
+        
+    }
 }
 
-extension CacheServiceTests {
+private extension CacheServiceTests {
+    func makeSUT(managerURL: URL? = nil) -> CacheService {
+        return CacheService(managerUrl: managerURL ?? validManagerURL())
+    }
+    
+    func validManagerURL() -> URL {
+        let path = type(of: self)
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appending(path: "\(path)")
+    }
+    
+    func invalidManagerURL() -> URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+    }
+    
     @discardableResult
-    private func insert(_ sut: CacheClient, items: [RestaurantItem], timestamp: Date) -> Error? {
+    func insert(_ sut: CacheClient, items: [RestaurantItem], timestamp: Date) -> Error? {
         let exp = expectation(description: "esperando o bloco ser completo")
         var returnedError: Error?
 
@@ -58,7 +148,22 @@ extension CacheServiceTests {
         return returnedError
     }
     
-    private func assert(
+    @discardableResult
+    func deleteCache(_ sut: CacheClient) -> Error? {
+        let exp = expectation(description: "esperando o bloco ser completo")
+        var returnedError: Error?
+
+        sut.delete { error in
+            returnedError = error
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+            
+        return returnedError
+    }
+    
+    func assert(
         _ sut: CacheClient,
         completion result: LoadResultState,
         file: StaticString = #filePath,

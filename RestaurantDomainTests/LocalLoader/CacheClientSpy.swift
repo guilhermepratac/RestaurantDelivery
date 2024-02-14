@@ -43,7 +43,7 @@ final class CacheClientSpy: CacheClient {
         completionHandlerSave?(error)
     }
     
-    func completionHandlerForLoad(_ state: LoadResultSate) {
+    func completionHandlerForLoad(_ state: LoadResultState) {
         completionHandlerLoad?(state)
     }
 }
