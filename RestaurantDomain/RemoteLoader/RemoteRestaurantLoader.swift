@@ -22,7 +22,7 @@ public final class RemoteRestaurantLoader: RestaurantLoader {
         self.networkClient = networkClient
     }
     
-    private func jsonParse(_ data: Data, response: HTTPURLResponse) -> RestaurantLoader.RestaurantLoaderResult {
+    private func jsonParse(_ data: Data, response: HTTPURLResponse) -> RestaurantLoader.RestaurantResult {
         guard let json = try? JSONDecoder().decode(RestaurantRoot.self, from: data), response.statusCode == okResponse else {
             return .failure(.invalidData)
         }
@@ -30,7 +30,7 @@ public final class RemoteRestaurantLoader: RestaurantLoader {
         return .success(json.items)
     }
         
-    public func load(completion: @escaping (RestaurantLoaderResult) -> Void) {
+    public func load(completion: @escaping (RestaurantResult) -> Void) {
         networkClient.request(from: url) { [weak self] result in
             guard let self = self else { return }
             switch result {
