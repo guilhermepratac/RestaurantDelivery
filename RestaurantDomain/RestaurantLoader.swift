@@ -13,6 +13,6 @@ public enum RestaurantResultError: Swift.Error {
 }
 
 public protocol RestaurantLoader {
-    typealias RestaurantLoaderResult = Result<[RestaurantItem], RestaurantResultError>
-    func load(completion: @escaping (RestaurantLoader.RestaurantLoaderResult) -> Void)
+    typealias RestaurantResult = Result<[RestaurantItem], RestaurantResultError>
+    func load(completion: @escaping (RestaurantLoader.RestaurantResult) -> Void)
 }
