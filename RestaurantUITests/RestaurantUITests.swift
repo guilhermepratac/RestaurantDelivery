@@ -57,16 +57,16 @@ final class RestaurantUITests: XCTestCase {
     func test_pullToRefresh_shoudb_be_called_load_service() {
         let (sut, service) = makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulatePullToRefresh()
         
         XCTAssertEqual(service.loadCount, 2)
         
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulatePullToRefresh()
         
         XCTAssertEqual(service.loadCount, 3)
 
         
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulatePullToRefresh()
         
         XCTAssertEqual(service.loadCount, 4)
 
@@ -77,9 +77,7 @@ final class RestaurantUITests: XCTestCase {
 
         sut.loadViewIfNeeded()
         
-        let result = sut.refreshControl?.isRefreshing ?? false
-        
-        XCTAssertTrue(result)
+        XCTAssertEqual(sut.isShowLoadingIndicator, true)
     }
     
     func test_load_when_completion_failure_should_be_hide_loading_indicator() {
@@ -88,9 +86,8 @@ final class RestaurantUITests: XCTestCase {
         sut.loadViewIfNeeded()
         service.completionResult(.failure(.connectivitiy))
         
-        let result = sut.refreshControl?.isRefreshing ?? true
-        
-        XCTAssertFalse(result)
+        XCTAssertEqual(sut.isShowLoadingIndicator, false)
+
     }
     
     func test_load_when_completion_sucess_should_be_hide_loading_indicator() {
@@ -99,31 +96,27 @@ final class RestaurantUITests: XCTestCase {
         sut.loadViewIfNeeded()
         service.completionResult(.success([makeItem()]))
         
-        let result = sut.refreshControl?.isRefreshing ?? true
-        
-        XCTAssertFalse(result)
+        XCTAssertEqual(sut.isShowLoadingIndicator, false)
+
     }
     
     func test_pulltoRefresh_should_be_show_loading_indicator() {
         let (sut, _) = makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulatePullToRefresh()
         
-        let result = sut.refreshControl?.isRefreshing ?? false
-        
-        XCTAssertTrue(result)
+        XCTAssertEqual(sut.isShowLoadingIndicator, true)
+
     }
     
     
     func test_pullToRefresh_should_be_hide_loading_indicator_when_service_completion_failure() {
         let (sut, service) = makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulatePullToRefresh()
         service.completionResult(.failure(.connectivitiy))
-
-        let result = sut.refreshControl?.isRefreshing ?? false
         
-        XCTAssertTrue(result)
+        XCTAssertEqual(sut.isShowLoadingIndicator, false)
     }
 
 }
@@ -135,6 +128,16 @@ extension UIRefreshControl {
                 (target as NSObject).perform(Selector($0))
             }
         }
+    }
+}
+
+extension RestaurantListViewController {
+    func simulatePullToRefresh() {
+        refreshControl?.simulatePullToRefresh()
+    }
+    
+    var isShowLoadingIndicator: Bool {
+        return refreshControl?.isRefreshing ?? false
     }
 }
 
