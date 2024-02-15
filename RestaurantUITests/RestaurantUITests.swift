@@ -23,7 +23,7 @@ final class RestaurantUITests: XCTestCase {
     
     func test_init_does_not_load() {
         let (_, service) =  makeSUT()
-        XCTAssertEqual(service.loadCount, 0)
+        XCTAssertTrue(service.methodsCalled.isEmpty)
     }
     
     func test_viewDidLoad_should_be_called_load_service() {
@@ -31,7 +31,7 @@ final class RestaurantUITests: XCTestCase {
 
         sut.loadViewIfNeeded()
 
-        XCTAssertEqual(service.loadCount, 1)
+        XCTAssertEqual(service.methodsCalled, [.load])
     }
     
     func test_load_returned_restaurantItems_data_and_restaurantCollection_does_not_empty() {
@@ -40,7 +40,7 @@ final class RestaurantUITests: XCTestCase {
         sut.loadViewIfNeeded()
         service.completionResult(.success([makeItem()]))
 
-        XCTAssertEqual(service.loadCount, 1)
+        XCTAssertEqual(service.methodsCalled, [.load])
         XCTAssertEqual(sut.restaurantCollection.count, 1)
     }
     
@@ -50,7 +50,7 @@ final class RestaurantUITests: XCTestCase {
         sut.loadViewIfNeeded()
         service.completionResult(.failure(.invalidData))
 
-        XCTAssertEqual(service.loadCount, 1)
+        XCTAssertEqual(service.methodsCalled, [.load])
         XCTAssertEqual(sut.restaurantCollection.count, 0)
     }
     
@@ -58,17 +58,10 @@ final class RestaurantUITests: XCTestCase {
         let (sut, service) = makeSUT()
 
         sut.simulatePullToRefresh()
-        
-        XCTAssertEqual(service.loadCount, 2)
-        
+        sut.simulatePullToRefresh()
         sut.simulatePullToRefresh()
         
-        XCTAssertEqual(service.loadCount, 3)
-
-        
-        sut.simulatePullToRefresh()
-        
-        XCTAssertEqual(service.loadCount, 4)
+        XCTAssertEqual(service.methodsCalled, [.load,.load,.load,.load])
 
     }
     
@@ -143,11 +136,16 @@ extension RestaurantListViewController {
 
 
 final class RestaurantLoaderSpy: RestaurantLoader {
-    private(set) var loadCount = 0
+    
+    enum Methods {
+        case load
+    }
+    private(set) var methodsCalled = [Methods]()
+        
     private var completionLoadHandler: ((RestaurantResult) -> Void)?
 
     func load(completion: @escaping (RestaurantResult) -> Void) {
-        loadCount+=1
+        methodsCalled.append(.load)
         completionLoadHandler = completion
     }
     
