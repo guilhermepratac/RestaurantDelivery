@@ -53,7 +53,89 @@ final class RestaurantUITests: XCTestCase {
         XCTAssertEqual(service.loadCount, 1)
         XCTAssertEqual(sut.restaurantCollection.count, 0)
     }
+    
+    func test_pullToRefresh_shoudb_be_called_load_service() {
+        let (sut, service) = makeSUT()
 
+        sut.refreshControl?.simulatePullToRefresh()
+        
+        XCTAssertEqual(service.loadCount, 2)
+        
+        sut.refreshControl?.simulatePullToRefresh()
+        
+        XCTAssertEqual(service.loadCount, 3)
+
+        
+        sut.refreshControl?.simulatePullToRefresh()
+        
+        XCTAssertEqual(service.loadCount, 4)
+
+    }
+    
+    func test_viewDidLoad_show_loading_indicator() {
+        let (sut, _) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        
+        let result = sut.refreshControl?.isRefreshing ?? false
+        
+        XCTAssertTrue(result)
+    }
+    
+    func test_load_when_completion_failure_should_be_hide_loading_indicator() {
+        let (sut, service) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        service.completionResult(.failure(.connectivitiy))
+        
+        let result = sut.refreshControl?.isRefreshing ?? true
+        
+        XCTAssertFalse(result)
+    }
+    
+    func test_load_when_completion_sucess_should_be_hide_loading_indicator() {
+        let (sut, service) = makeSUT()
+
+        sut.loadViewIfNeeded()
+        service.completionResult(.success([makeItem()]))
+        
+        let result = sut.refreshControl?.isRefreshing ?? true
+        
+        XCTAssertFalse(result)
+    }
+    
+    func test_pulltoRefresh_should_be_show_loading_indicator() {
+        let (sut, _) = makeSUT()
+
+        sut.refreshControl?.simulatePullToRefresh()
+        
+        let result = sut.refreshControl?.isRefreshing ?? false
+        
+        XCTAssertTrue(result)
+    }
+    
+    
+    func test_pullToRefresh_should_be_hide_loading_indicator_when_service_completion_failure() {
+        let (sut, service) = makeSUT()
+
+        sut.refreshControl?.simulatePullToRefresh()
+        service.completionResult(.failure(.connectivitiy))
+
+        let result = sut.refreshControl?.isRefreshing ?? false
+        
+        XCTAssertTrue(result)
+    }
+
+}
+
+extension UIRefreshControl {
+    func simulatePullToRefresh() {
+        allTargets.forEach { target in
+            actions(forTarget: target, forControlEvent: .valueChanged)?.forEach{
+                (target as NSObject).perform(Selector($0))
+            }
+        }
+    }
 }
 
 

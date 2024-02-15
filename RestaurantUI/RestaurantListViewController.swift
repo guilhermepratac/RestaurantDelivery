@@ -11,13 +11,13 @@ import RestaurantDomain
 /*
  ### Lista de restaurantes UI
  - [x] Carregamento automático da lista de restaurantes, quando a tela for exibida
- - [ ] Habilitar recurso para atualização manual (pull to refresh)
- - [ ] Exibir um loading indicativo, durante processo de carregamento
+ - [x] Habilitar recurso para atualização manual (pull to refresh)
+ - [x] Exibir um loading indicativo, durante processo de carregamento
  - [ ] Renderizar todas as informações disponíveis de restaurantes
 
  */
 
-class RestaurantListViewController: UIViewController {
+class RestaurantListViewController: UITableViewController {
     
     private(set) var restaurantCollection: [RestaurantItem] = []
     private var service: RestaurantLoader? = nil
@@ -29,6 +29,17 @@ class RestaurantListViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupRefreshControll()
+        loadService()
+    }
+    
+    private func setupRefreshControll() {
+        refreshControl = UIRefreshControl()
+        refreshControl?.addTarget(self, action: #selector(loadService), for: .valueChanged)
+        refreshControl?.beginRefreshing()
+    }
+    
+    @objc func loadService() {
         service?.load { [weak self] result in
             guard let self else { return }
             switch result {
@@ -36,7 +47,8 @@ class RestaurantListViewController: UIViewController {
                 self.restaurantCollection = items
             default: break
             }
+            
+            self.refreshControl?.endRefreshing()
         }
-
     }
 }
