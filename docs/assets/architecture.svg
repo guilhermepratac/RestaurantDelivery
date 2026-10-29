@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="390" viewBox="0 0 1080 390" role="img" aria-labelledby="title desc">
+<title id="title">Um contrato, duas origens</title>
+<desc id="desc">RemoteRestaurantLoader e LocalRestaurantLoader implementam RestaurantLoader. O remoto usa NetworkClient e URLSession; o local usa CacheClient e CachePolicy.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10" fill="#81909d"/></marker></defs>
+<rect x="1" y="1" width="1078" height="388" rx="20" fill="#111820" stroke="#2d3945"/>
+<g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">
+<text x="540" y="42" text-anchor="middle" font-size="15" font-weight="600" letter-spacing="3" fill="#a4afba">UM CONTRATO, DUAS ORIGENS</text>
+<rect x="337" y="64" width="406" height="72" rx="14" fill="#26303a" stroke="#516170"/>
+<text x="540" y="109" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,monospace" font-size="26" font-weight="600" fill="#f2f5f7">RestaurantLoader</text>
+<path d="M276 221 V170 H420 V143" fill="none" stroke="#81909d" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M804 221 V170 H660 V143" fill="none" stroke="#81909d" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="540" y="183" text-anchor="middle" font-size="15" fill="#9ca8b4">implementações independentes</text>
+<rect x="40" y="222" width="472" height="128" rx="14" fill="#1a252e" stroke="#3d5667"/>
+<rect x="568" y="222" width="472" height="128" rx="14" fill="#29231f" stroke="#745746"/>
+<text x="66" y="251" font-size="13" font-weight="700" letter-spacing="2" fill="#8bbcd0">REDE</text>
+<text x="66" y="283" font-family="ui-monospace,SFMono-Regular,monospace" font-size="23" font-weight="600" fill="#edf3f7">RemoteRestaurantLoader</text>
+<text x="66" y="321" font-size="19" fill="#adbfc9">NetworkClient · URLSession · JSON</text>
+<text x="594" y="251" font-size="13" font-weight="700" letter-spacing="2" fill="#e6ac83">CACHE</text>
+<text x="594" y="283" font-family="ui-monospace,SFMono-Regular,monospace" font-size="23" font-weight="600" fill="#faf0e9">LocalRestaurantLoader</text>
+<text x="594" y="321" font-size="19" fill="#c7b5a8">CacheClient · CachePolicy · JSON</text>
+</g></svg>
